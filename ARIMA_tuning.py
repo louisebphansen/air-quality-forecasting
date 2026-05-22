@@ -29,11 +29,9 @@ def sarimax_tuning(
             "aic":            float,
         }
     """
-    d = 1
-    D = 1
     
-    #d = ndiffs(y_train, test="kpss")
-    #D = nsdiffs(y_train, m=m, test="ch")
+    d = ndiffs(y_train, test="kpss")
+    D = nsdiffs(y_train, m=m, test="ch")
     print(f"  [{fit_name}] d={d}, D={D}")
 
     results = []
