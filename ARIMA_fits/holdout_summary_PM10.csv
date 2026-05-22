@@ -1,0 +1,2 @@
+pollutant,best_spec,order,seasonal_order,cv_rmse,cv_rmse_sd,holdout_rmse,holdout_smape,boot_coverage,boot_mean_width
+PM10,PM10_fit_1,"(3, 1, 1)","(1, 0, 1, 24)",3.893912617160475,1.0659255735490374,6.214538157436386,30.022069983369796,0.3333333333333333,3.8406582712120083
