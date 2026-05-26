@@ -82,7 +82,7 @@ def run_model(particle, exog_variables, nhits_config, df_train, step_size, w_siz
                 fontsize=13, y=1.01)
     plt.tight_layout()
 
-    outpath_plots = os.path.join('out', 'cv_plots', 'NHITS', particle)
+    outpath_plots = os.path.join('out', 'cv_plots', 'NHITS_CONFIGS_TESTER', particle)
     os.makedirs(outpath_plots, exist_ok=True)
     plt.savefig(os.path.join(outpath_plots, f"{model_save_name}.png"))
 
@@ -109,39 +109,86 @@ def main():
     train_df = df.iloc[:-test_size]
     test_df  = df.iloc[-test_size:]
     
-    config = {
-        "learning_rate": tune.loguniform(1e-4, 1e-2), # step size for learning rate optimizer
-        "max_steps": tune.choice([2000]), # number of gradient steps (??)
-        "input_size": tune.choice([7*24]),  # 8 days vs 28 days lookback period
-        "batch_size": tune.choice([1]), # just 1 since i only have one time series
-        "windows_batch_size": tune.choice([256]), # number of windows sampled from the series per training step
-        "n_pool_kernel_size": tune.choice([[4, 2, 1]]), # maxpool kernel size
-        "n_freq_downsample": tune.choice([
-    [4, 2, 1],   # coarse/medium/fine decomposition aligned to 96h horizon
+   # config = {
+    #    "learning_rate": tune.loguniform(1e-4, 1e-2), # step size for learning rate optimizer
+     #   "max_steps": tune.choice([2000]), # number of gradient steps (??)
+      #  "input_size": tune.choice([7*24]),  # 8 days vs 28 days lookback period
+       # "batch_size": tune.choice([1]), # just 1 since i only have one time series
+        #"windows_batch_size": tune.choice([256]), # number of windows sampled from the series per training step
+     #   "n_pool_kernel_size": tune.choice([[4, 2, 1]]), # maxpool kernel size
+    #    "n_freq_downsample": tune.choice([
+    #[4, 2, 1],   # coarse/medium/fine decomposition aligned to 96h horizon
         #[24, 4, 1],    # daily cycle emphasis
-    ]), # controls interpolation ratio when projecting each stack's output back up to the horizon
-        "dropout_prob_theta": tune.choice([0.2]), # dropout, regularization to the MLP output
-        "activation": tune.choice(["ReLU"]), # activation function used in the mlp units
-        "n_blocks": tune.choice([[3, 3, 3]]), # number of blocks per stack
-        "mlp_units": tune.choice([[[512, 512], [512, 512], [512, 512]]]), # size of MLP units (one pair per stack)
-        "interpolation_mode": tune.choice(["linear"]), # how the coefficents from MLP are interpolated to the full horizon length again
-        "val_check_steps": tune.choice([100]), # how often to evaluate on the validation set during training (??)
-        "random_seed": tune.randint(1, 10) # vary random seet to reduce risk of lucky/unlucky init
+    #]), # controls interpolation ratio when projecting each stack's output back up to the horizon
+   #     "dropout_prob_theta": tune.choice([0.2]), # dropout, regularization to the MLP output
+     #   "activation": tune.choice(["ReLU"]), # activation function used in the mlp units
+      #  "n_blocks": tune.choice([[3, 3, 3]]), # number of blocks per stack
+       # "mlp_units": tune.choice([[[512, 512], [512, 512], [512, 512]]]), # size of MLP units (one pair per stack)
+        #"interpolation_mode": tune.choice(["linear"]), # how the coefficents from MLP are interpolated to the full horizon length again
+        #"val_check_steps": tune.choice([100]), # how often to evaluate on the validation set during training (??)
+        #"random_seed": tune.randint(1, 10) # vary random seet to reduce risk of lucky/unlucky init
+    #}
+
+    config = {
+        "learning_rate": tune.loguniform(1e-4, 1e-2),
+        "max_steps": tune.choice([2000]),
+        "input_size": tune.choice([7*24]),
+        "batch_size": tune.choice([1]),
+        "windows_batch_size": tune.choice([256]),
+        "n_pool_kernel_size": tune.choice([
+            [4, 2, 1],
+            [2, 1, 1],
+            [1, 1, 1],
+        ]),
+        "n_freq_downsample": tune.choice([
+            [4, 2, 1],
+            [24, 4, 1],
+            [168, 24, 1],
+        ]),
+        "dropout_prob_theta": tune.choice([0.0, 0.2]),
+        "activation": tune.choice(["ReLU"]),
+        "n_blocks": tune.choice([[3, 3, 3]]),
+        "mlp_units": tune.choice([[[512, 512], [512, 512], [512, 512]]]),
+        "interpolation_mode": tune.choice(["linear"]),
+        "val_check_steps": tune.choice([100]),
+        "random_seed": tune.randint(1, 10)
     }
 
     model_setup = { 
+        'NO2': {
+            #'no_exg': None, 
+            #'temp': ['temperature'],
+            #'wind_speed': ['wind_speed'],
+            'temp_wind-speed': ['wind_speed', 'temperature'],
+            #'everything': ['wind_speed', 'temperature', 'humidity', 'solar_radiation'] 
+    },
+        'O3': {
             'no_exg': None, 
             'temp': ['temperature'],
             'wind_speed': ['wind_speed'],
             'temp_wind-speed': ['wind_speed', 'temperature'],
             'everything': ['wind_speed', 'temperature', 'humidity', 'solar_radiation'] 
+        },
+        'PM2.5':{
+            'no_exg': None, 
+            'temp': ['temperature'],
+            'temp_humidity': ['temperature', 'humidity'],
+            'everything': ['wind_speed', 'temperature', 'humidity', 'solar_radiation'] 
+        },
+        'PM10':{
+            'no_exg': None, 
+            'temp': ['temperature'],
+            'temp_humidity': ['temperature', 'humidity'],
+            'everything': ['wind_speed', 'temperature', 'humidity', 'solar_radiation'] 
+        },
     }
 
 
-    for particle in ['NO2', 'O3', 'PM2.5', 'PM10']:
-
+    #for particle in ['NO2', 'O3', 'PM2.5', 'PM10']:
+    #for particle in ['PM2.5', 'PM10']:
+    for particle in ['NO2']:
         rows = []
-        for name, setup in model_setup.items():
+        for name, setup in model_setup[particle].items():
             best_config, rmse, rmse_sd = run_model(particle, setup, config, train_df, 96, 5, name)
 
             rows.append({
