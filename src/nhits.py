@@ -1,3 +1,7 @@
+"""
+Run NHITS air quality forecasting
+"""
+
 import numpy as np 
 from neuralforecast.auto import AutoNHITS
 from neuralforecast.core import NeuralForecast
@@ -13,6 +17,10 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 def run_model(particle, exog_variables, nhits_config, df_train, step_size, w_size, model_save_name):
 
+    """
+    FIT NHITS models with specified exogenous varibles for specific particle.
+    Runs cross validation for model selection of exogenous variables and saves results and model specifications to folder.
+    """
     horizon = 96          # forecast 96 hours ahead
     num_samples = 5       # number of Ray Tune trials (5 times, it randomly selects a combination of these values)
 
@@ -40,11 +48,11 @@ def run_model(particle, exog_variables, nhits_config, df_train, step_size, w_siz
 
     nf = NeuralForecast(models=[model], freq="h")
 
-    # set up cross validation; we're doing hyperparameter tuning + cross validation in one
+    # set up cross validation; with nhits, we're doing hyperparameter tuning + cross validation in one
     cv_df = nf.cross_validation(df=particle_df, n_windows=w_size,
                             step_size=step_size, refit=False, verbose=False) # refit = False for computational purposes
     
-    # get measurements
+    # get metrics
     mae = np.mean(np.abs(cv_df["AutoNHITS"] - cv_df["y"]))
     mse = np.mean((cv_df["AutoNHITS"] - cv_df["y"]) ** 2)
     rmse = np.sqrt(mse)
@@ -54,7 +62,6 @@ def run_model(particle, exog_variables, nhits_config, df_train, step_size, w_siz
     cutoffs = cv_df["cutoff"].unique()
 
     # create + save plot
-
     fig, axes = plt.subplots(len(cutoffs), 1, figsize=(14, 4 * len(cutoffs)))
 
     for ax, cutoff in zip(axes, cutoffs):
@@ -82,7 +89,7 @@ def run_model(particle, exog_variables, nhits_config, df_train, step_size, w_siz
                 fontsize=13, y=1.01)
     plt.tight_layout()
 
-    outpath_plots = os.path.join('out', 'cv_plots', 'NHITS_CONFIGS_TESTER', particle)
+    outpath_plots = os.path.join('out', 'cv_plots', 'NHITS', particle)
     os.makedirs(outpath_plots, exist_ok=True)
     plt.savefig(os.path.join(outpath_plots, f"{model_save_name}.png"))
 
@@ -101,66 +108,45 @@ def run_model(particle, exog_variables, nhits_config, df_train, step_size, w_siz
 
 def main():
 
+    # load data df
     df = pd.read_csv(os.path.join('aarhus_air_quality.csv'))
 
-    # convert back to datetime
+    # csv -> pandas conversion requires to convert to pd datetime object
     df['Recorded'] = pd.to_datetime(df['Recorded'])
+
+    # save last 96 hours for test data
     test_size = 96
     train_df = df.iloc[:-test_size]
     test_df  = df.iloc[-test_size:]
     
-   # config = {
-    #    "learning_rate": tune.loguniform(1e-4, 1e-2), # step size for learning rate optimizer
-     #   "max_steps": tune.choice([2000]), # number of gradient steps (??)
-      #  "input_size": tune.choice([7*24]),  # 8 days vs 28 days lookback period
-       # "batch_size": tune.choice([1]), # just 1 since i only have one time series
-        #"windows_batch_size": tune.choice([256]), # number of windows sampled from the series per training step
-     #   "n_pool_kernel_size": tune.choice([[4, 2, 1]]), # maxpool kernel size
-    #    "n_freq_downsample": tune.choice([
-    #[4, 2, 1],   # coarse/medium/fine decomposition aligned to 96h horizon
-        #[24, 4, 1],    # daily cycle emphasis
-    #]), # controls interpolation ratio when projecting each stack's output back up to the horizon
-   #     "dropout_prob_theta": tune.choice([0.2]), # dropout, regularization to the MLP output
-     #   "activation": tune.choice(["ReLU"]), # activation function used in the mlp units
-      #  "n_blocks": tune.choice([[3, 3, 3]]), # number of blocks per stack
-       # "mlp_units": tune.choice([[[512, 512], [512, 512], [512, 512]]]), # size of MLP units (one pair per stack)
-        #"interpolation_mode": tune.choice(["linear"]), # how the coefficents from MLP are interpolated to the full horizon length again
-        #"val_check_steps": tune.choice([100]), # how often to evaluate on the validation set during training (??)
-        #"random_seed": tune.randint(1, 10) # vary random seet to reduce risk of lucky/unlucky init
-    #}
-
     config = {
-        "learning_rate": tune.loguniform(1e-4, 1e-2),
-        "max_steps": tune.choice([2000]),
-        "input_size": tune.choice([7*24]),
-        "batch_size": tune.choice([1]),
-        "windows_batch_size": tune.choice([256]),
-        "n_pool_kernel_size": tune.choice([
-            [4, 2, 1],
-            [2, 1, 1],
-            [1, 1, 1],
-        ]),
+        "learning_rate": tune.loguniform(1e-4, 1e-2), # step size for learning rate optimizer
+        "max_steps": tune.choice([2000]), # number of gradient steps (??)
+        "input_size": tune.choice([7*24]),  # 8 days vs 28 days lookback period
+        "batch_size": tune.choice([1]), # just 1 since i only have one time series
+        "windows_batch_size": tune.choice([256]), # number of windows sampled from the series per training step
+        "n_pool_kernel_size": tune.choice([[4, 2, 1]]), # maxpool kernel size
         "n_freq_downsample": tune.choice([
-            [4, 2, 1],
-            [24, 4, 1],
-            [168, 24, 1],
-        ]),
-        "dropout_prob_theta": tune.choice([0.0, 0.2]),
-        "activation": tune.choice(["ReLU"]),
-        "n_blocks": tune.choice([[3, 3, 3]]),
-        "mlp_units": tune.choice([[[512, 512], [512, 512], [512, 512]]]),
-        "interpolation_mode": tune.choice(["linear"]),
-        "val_check_steps": tune.choice([100]),
-        "random_seed": tune.randint(1, 10)
+    [4, 2, 1],   # coarse/medium/fine decomposition aligned to 96h horizon
+        [24, 4, 1],    # daily cycle emphasis
+    ]), # controls interpolation ratio when projecting each stack's output back up to the horizon
+        "dropout_prob_theta": tune.choice([0.2]), # dropout, regularization to the MLP output
+        "activation": tune.choice(["ReLU"]), # activation function used in the mlp units
+        "n_blocks": tune.choice([[3, 3, 3]]), # number of blocks per stack
+        "mlp_units": tune.choice([[[512, 512], [512, 512], [512, 512]]]), # size of MLP units (one pair per stack)
+        "interpolation_mode": tune.choice(["linear"]), # how the coefficents from MLP are interpolated to the full horizon length again
+        "val_check_steps": tune.choice([100]), # how often to evaluate on the validation set during training (??)
+        "random_seed": tune.randint(1, 10) # vary random seet to reduce risk of lucky/unlucky init
     }
 
+    # define model setups with exogenous variables
     model_setup = { 
         'NO2': {
-            #'no_exg': None, 
-            #'temp': ['temperature'],
-            #'wind_speed': ['wind_speed'],
+            'no_exg': None, 
+            'temp': ['temperature'],
+            'wind_speed': ['wind_speed'],
             'temp_wind-speed': ['wind_speed', 'temperature'],
-            #'everything': ['wind_speed', 'temperature', 'humidity', 'solar_radiation'] 
+            'everything': ['wind_speed', 'temperature', 'humidity', 'solar_radiation'] 
     },
         'O3': {
             'no_exg': None, 
@@ -183,10 +169,8 @@ def main():
         },
     }
 
-
-    #for particle in ['NO2', 'O3', 'PM2.5', 'PM10']:
-    #for particle in ['PM2.5', 'PM10']:
-    for particle in ['NO2']:
+    # seperate model for each particle
+    for particle in ['NO2', 'O3', 'PM2.5', 'PM10']:
         rows = []
         for name, setup in model_setup[particle].items():
             best_config, rmse, rmse_sd = run_model(particle, setup, config, train_df, 96, 5, name)
