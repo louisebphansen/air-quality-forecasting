@@ -78,7 +78,7 @@ def main():
     args = argument_parser()
 
     # read data and convert to datetime
-    df = pd.read_csv(os.path.join('aarhus_air_quality.csv'))
+    df = pd.read_csv(os.path.join('data', 'aarhus_air_quality.csv'))
     df['Recorded'] = pd.to_datetime(df['Recorded'])
         
     exg_variables = args['exg_variables']

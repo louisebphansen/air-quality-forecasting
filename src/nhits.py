@@ -109,7 +109,7 @@ def run_model(particle, exog_variables, nhits_config, df_train, step_size, w_siz
 def main():
 
     # load data df
-    df = pd.read_csv(os.path.join('aarhus_air_quality.csv'))
+    df = pd.read_csv(os.path.join('data', 'aarhus_air_quality.csv'))
 
     # csv -> pandas conversion requires to convert to pd datetime object
     df['Recorded'] = pd.to_datetime(df['Recorded'])

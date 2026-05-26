@@ -18,7 +18,7 @@ def lag24_predict(y_before_test, horizon=96, lag=24, repeats=4):
 def main():
 
     # load data
-    df = pd.read_csv(os.path.join('aarhus_air_quality.csv'))
+    df = pd.read_csv(os.path.join('data', 'aarhus_air_quality.csv'))
     df['Recorded'] = pd.to_datetime(df['Recorded'])
 
     # define train and test df
