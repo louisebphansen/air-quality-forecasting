@@ -18,7 +18,7 @@ def sarimax_tuning(
 ):
     """
     Grid-searches SARIMA orders for one (pollutant, fit) combination.
-    Saves the best model and residual plots to disk.
+    Saves the best model residual plots.
 
     Returns a spec dict:
         {
@@ -64,12 +64,7 @@ def sarimax_tuning(
     print(f"  → Best: order={best['order']}  seasonal={best['seasonal_order']}  AIC={best['aic']:.2f}")
     print(best_model.summary())
 
-    os.makedirs("ARIMA_fits",  exist_ok=True)
-    os.makedirs("ARIMA_plots", exist_ok=True)
-
-    model_path = f"ARIMA_fits/{fit_name}_p{p_b}d{d}q{q_b}_AIC{best['aic']:.2f}.pkl"
-    joblib.dump(best_model, model_path)
-    print(f"  → saved {model_path}")
+    os.makedirs("../out/plots/ARIMA_residuals", exist_ok=True)
 
     residuals = best_model.resid
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))
@@ -83,7 +78,7 @@ def sarimax_tuning(
     plot_pacf(residuals, ax=axes[1, 1], lags=48)
     axes[1, 1].set_title("PACF of residuals")
     plt.tight_layout()
-    plt.savefig(f"ARIMA_plots/{fit_name}_residuals.png", dpi=150, bbox_inches="tight")
+    plt.savefig(f"../out/plots/ARIMA_residuals/{fit_name}_residuals.png", dpi=150, bbox_inches="tight")
     plt.close()
 
     return {
