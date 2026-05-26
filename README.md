@@ -20,8 +20,8 @@ air-quality-forecasting/
 │   └── forecast_plots.ipynb             # Code for plotting and saving forecasting results
 │
 ├── src/                                 # Source code
-│   ├── ARIMA_CV.py                      # 
-│   ├── ARIMA_tuning.py                  # 
+│   ├── ARIMA_CV.py                      # Includes function for performing cross validation, used by ARIMA_tune_fit_CV.ipynb
+│   ├── ARIMA_tuning.py                  # Includes function for grid search hyperparameters used by ARIMA_tune_fit_CV.ipynb
 │   ├── nhits_predict.py                 # predict on hold-out test set using NHITS
 │   ├── nhits.py                         # fit NHITS models with exogenous variables on train data
 │   └── seasonal_naive.py                # predict using seasonal naive model
