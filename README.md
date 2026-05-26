@@ -29,7 +29,7 @@ air-quality-forecasting/
 ├── out/                                 # plots and results
 │   ├── cv_plots/                        # cv plots for the NHITS
 │   ├── cv_results/                      # cv results for ARIMA and NHITS
-│   ├── forecasts.png                    # hold-out forecasts for all models
+│   ├── forecasts/                       # hold-out forecasts for all models
 │   └── plots                            # result plots
 │
 ├── README.md                             
