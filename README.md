@@ -51,7 +51,7 @@ git clone https://github.com/louisebphansen/air-quality-forecasting.git
 
 #### Data
 
-Data from OpenMeteos public [API] (https://open-meteo.com/en/docs/air-quality-api) for the specified period (18th of April 2025 - 18th of April 2026) are gathered and saved to a CSV file under ```data```. 
+Data from OpenMeteos public [API](https://open-meteo.com/en/docs/air-quality-api) for the specified period (18th of April 2025 - 18th of April 2026) are gathered and saved to a CSV file under ```data```. 
 
 #### Usage
 
