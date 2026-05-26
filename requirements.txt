@@ -6,3 +6,4 @@ matplotlib
 statsmodels
 pmdarima
 scikit-learn
+neuralforecast==3.1.8
