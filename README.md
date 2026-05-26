@@ -32,7 +32,7 @@ air-quality-forecasting/
 │   ├── forecasts.png                    # hold-out forecasts for all models
 │   └── plots                            # result plots
 │
-├── README.md                            # 
+├── README.md                             
 ├── requirements.txt                     # Python dependencies
 ├── run_forecasts.sh                     # Run NHITS modelling
 ├── env_to_jupyter.sh                    # creates kernel from .venv to be used for jupyter 
@@ -73,7 +73,7 @@ env_to_jupyter.sh
 to install .venv to kernel for Jupyter Notebooks. 
 
 ### Usage
-All source code scripts (in ```src```) should be run from the terminal from the main folder.
+All source code scripts, which contains the main analyses (in ```src```), should be run from the terminal from the main folder.
 
 Specifically, to run predictions for NHITS on the hold-out test set, run this bash script:
 
