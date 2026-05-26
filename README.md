@@ -11,13 +11,13 @@ air-quality-forecasting/
 │   └── aarhus_air_quality.csv           # 
 │
 ├── nbs/                                 # Jupyter Notebooks
-│   ├── ARIMA_tune_fit_CV.ipynb          # 
-│   ├── CCF_plots.ipynb                  # 
+│   ├── ARIMA_tune_fit_CV.ipynb          # Grid search hyperparameters and find best ARIMA models 
+│   ├── CCF_plots.ipynb                  # Plot CCF for pollutants
 │   ├── exogenous_variables.ipynb        # 
-│   ├── explore_data_and_ACF.ipynb       #  
+│   ├── explore_data_and_ACF.ipynb       # Explores raw pollutant levels and seasonality
 │   └── forecast_plots.ipynb             #
 │
-├── src/                                 # Source code (contains main analyses)
+├── src/                                 # Source code
 │   ├── ARIMA_CV.py                      # 
 │   ├── ARIMA_tuning.py                  # 
 │   ├── nhits_predict.py                 # 
