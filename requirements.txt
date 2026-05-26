@@ -7,3 +7,4 @@ pmdarima==2.1.1
 ray==2.55.1
 scikit_learn==1.8.0
 statsmodels==0.14.6
+seaborn==0.13.2
