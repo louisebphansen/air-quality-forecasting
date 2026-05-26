@@ -108,9 +108,9 @@ def compare_sarimax_models(
     } for p in performance])
     cv_df = pd.concat([cv_df, summary_rows], ignore_index=True)
 
-    os.makedirs("ARIMA_fits", exist_ok=True)
-    cv_df.to_csv(f"ARIMA_fits/cv_results_{pollutant}.csv", index=False)
-    print(f"  → CV results saved to ARIMA_fits/cv_results_{pollutant}.csv")
+    os.makedirs("../out/cv_results/ARIMA", exist_ok=True)
+    cv_df.to_csv(f"../out/cv_results/ARIMA/cv_results_{pollutant}.csv", index=False)
+    print(f"  → CV results saved to ../out/cv_results/ARIMA/cv_results_{pollutant}.csv")    
 
     # ── Step 2: pick best by mean CV RMSE ────────────────────────────────
     best_result = min(performance, key=lambda x: x["cv_rmse"])
@@ -175,8 +175,10 @@ def compare_sarimax_models(
         "bootstrap_upper":  upper_pi,
         "bootstrap_width":  interval_width,
     })
-    holdout_df.to_csv(f"ARIMA_fits/holdout_forecast_{pollutant}.csv", index=False)
-    print(f"  → Holdout forecast saved to ARIMA_fits/holdout_forecast_{pollutant}.csv")
+
+    os.makedirs("../out/forecasts/ARIMA", exist_ok=True)
+    holdout_df.to_csv(f"../out/forecasts/ARIMA/holdout_forecast_{pollutant}.csv", index=False)
+    print(f"  → Holdout forecast saved to ../out/forecasts/ARIMA/holdout_forecast_{pollutant}.csv")
 
     # ── Save holdout summary metrics ──────────────────────────────────────
     pd.DataFrame([{
@@ -190,9 +192,10 @@ def compare_sarimax_models(
         "holdout_smape":    holdout_smape,
         "boot_coverage":    coverage,
         "boot_mean_width":  interval_width.mean(),
-    }]).to_csv(f"ARIMA_fits/holdout_summary_{pollutant}.csv", index=False)
-    print(f"  → Holdout summary saved to ARIMA_fits/holdout_summary_{pollutant}.csv")
+    }]).to_csv(f"../out/forecasts/ARIMA/holdout_summary_{pollutant}.csv", index=False)
+    print(f"  → Holdout summary saved to ../out/forecasts/ARIMA/holdout_summary_{pollutant}.csv")
 
-    save_path = f"ARIMA_fits/{best_spec['name'].split('_')[0]}_BEST_{best_spec['name']}.pkl"
+    os.makedirs("../out/modelfits/ARIMA", exist_ok=True)
+    save_path = f"../out/modelfits/ARIMA/{best_spec['name'].split('_')[0]}_BEST_{best_spec['name']}.pkl"
     joblib.dump(final_model, save_path)
     print(f"  → Model saved to {save_path}")
