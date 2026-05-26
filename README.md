@@ -53,7 +53,7 @@ git clone https://github.com/louisebphansen/air-quality-forecasting.git
 
 Data from OpenMeteos public [API](https://open-meteo.com/en/docs/air-quality-api) for the specified period (18th of April 2025 - 18th of April 2026) are gathered and saved to a CSV file under ```data```. 
 
-#### Usage
+#### Setup
 
 To create the virtual environment, make sure to install the *venv* package.
 
@@ -72,6 +72,7 @@ env_to_jupyter.sh
 
 to install .venv to kernel for Jupyter Notebooks. 
 
+#### Usage
 All source code scripts (in ```src```) should be run from the terminal from the main folder.
 
 Specifically, to run predictions for NHITS on the hold-out test set, run this bash script:
